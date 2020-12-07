@@ -50,7 +50,6 @@ class IMGLYCircleLayerView: UIView {
         context?.setBlendMode(.clear)
         UIColor.clear.setFill()
         circle.fill()
-        
     }
     
     //Allow touches through the circle crop cutter view

@@ -18,7 +18,7 @@ extension Notification.Name {
 open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
 
     // MARK: - Properties
-    let cutterView = IMGLYCircleLayerView()
+    let circleOverlyView = IMGLYCircleLayerView()
     open var stickersDataSource = IMGLYStickersDataSource()
     open fileprivate(set) lazy var stickersClipView: UIView = {
         let view = UIView()
@@ -46,12 +46,12 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
                 if let image = view.image {
                     let stickerFilter = IMGLYInstanceFactory.stickerFilter()
                     stickerFilter.sticker = image
-                    let center = CGPoint(x: view.center.x / self.cutterView.frame.size.width,
-                                         y: view.center.y / self.cutterView.frame.size.height)
+                    let center = CGPoint(x: view.center.x / self.circleOverlyView.frame.size.width,
+                                         y: view.center.y / self.circleOverlyView.frame.size.height)
                     
                     var size = initialSizeForStickerImage(image)
-                    size.width = size.width / self.cutterView.bounds.size.width
-                    size.height = size.height / self.cutterView.bounds.size.height
+                    size.width = size.width / self.circleOverlyView.bounds.size.width
+                    size.height = size.height / self.circleOverlyView.bounds.size.height
                     stickerFilter.center = center
                     stickerFilter.scale = size.width
                     stickerFilter.transform = view.transform
@@ -73,8 +73,8 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     }
     
     fileprivate func reCalculateCropRectBounds() {
-        let width = self.cutterView.frame.size.width
-        let height = self.cutterView.frame.size.height
+        let width = self.circleOverlyView.frame.size.width
+        let height = self.circleOverlyView.frame.size.height
         cropRectLeftBound = (width - previewImageView.visibleImageFrame.size.width) / 2.0
         cropRectRightBound = width - cropRectLeftBound
         cropRectTopBound = (height - previewImageView.visibleImageFrame.size.height) / 2.0
@@ -101,10 +101,10 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             let width: CGFloat = previewImageView.frame.size.width * scale
             let height: CGFloat = previewImageView.frame.size.height * scale*/
             
-            let x: CGFloat = (previewImageView.contentOffset.x + self.cutterView.circleBounds.origin.x) * scale
-            let y: CGFloat = (previewImageView.contentOffset.y + self.cutterView.circleBounds.origin.y) * scale
-            let width: CGFloat = self.cutterView.circleBounds.size.width * scale
-            let height: CGFloat = self.cutterView.circleBounds.size.height * scale
+            let x: CGFloat = (previewImageView.contentOffset.x + self.circleOverlyView.circleBounds.origin.x) * scale
+            let y: CGFloat = (previewImageView.contentOffset.y + self.circleOverlyView.circleBounds.origin.y) * scale
+            let width: CGFloat = self.circleOverlyView.circleBounds.size.width * scale
+            let height: CGFloat = self.circleOverlyView.circleBounds.size.height * scale
             
             let posX = x / self.previewImageView.image!.size.width
             let posY = y / self.previewImageView.image!.size.height
@@ -149,14 +149,14 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let imageView = UIImageView(image: img)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(img)
-        imageView.center = CGPoint(x: self.cutterView.circleBounds.midX, y: self.cutterView.circleBounds.midY)
+        imageView.center = CGPoint(x: self.circleOverlyView.circleBounds.midX, y: self.circleOverlyView.circleBounds.midY)
         self.view.addSubview(imageView)
         imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
         
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: [], animations: { () -> Void in
             imageView.transform = CGAffineTransform.identity
             }, completion: nil)
-        self.view.bringSubviewToFront(self.cutterView)
+        self.view.bringSubviewToFront(self.circleOverlyView)
     }
     
     fileprivate func initialSizeForStickerImage(_ image: UIImage) -> CGSize {
@@ -186,16 +186,34 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         configureCropView()
         configureGestureRecognizers()
         backupStickers()
-        if self.fixedFilterStack.stickerFilters.count == 0{
+        if self.fixedFilterStack.stickerFilters.count == 0 {
             self.delegate?.openPhotoCollection()
             self.updating = true
         }
         fixedFilterStack.stickerFilters.removeAll()
+        
+        rerenderPreviewWithoutStickers()
+        
+        let cropRect = fixedFilterStack.orientationCropFilter.cropRect
+        if cropRect.origin.x != 0 || cropRect.origin.y != 0 ||
+            cropRect.size.width != 1.0 || cropRect.size.height != 1.0 {
+                updatePreviewImageWithoutCropWithCompletion {
+                    self.view.setNeedsLayout()
+                    self.view.layoutIfNeeded()
+                    self.reCalculateCropRectBounds()
+                }
+        } else {
+            reCalculateCropRectBounds()
+        }
     }
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        rerenderPreviewWithoutStickers()
+        
+        guard self.isViewDidAppear == false else {
+            return
+        }
+        
         self.isViewDidAppear = true
         self.setCropRectForSelectionRatio()
     }
@@ -218,15 +236,24 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             return
         }
         stickersClipView.frame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
-        cutterView.frame = self.previewImageView.frame
-        cutterView.circleFrame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
+        circleOverlyView.frame = self.previewImageView.frame
+        circleOverlyView.circleFrame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
         reCalculateCropRectBounds()
     }
         
+    fileprivate func updatePreviewImageWithoutCropWithCompletion(_ completionHandler: IMGLYPreviewImageGenerationCompletionBlock?) {
+        let oldCropRect = fixedFilterStack.orientationCropFilter.cropRect
+        fixedFilterStack.orientationCropFilter.cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        updatePreviewImageWithCompletion { () -> (Void) in
+            self.fixedFilterStack.orientationCropFilter.cropRect = oldCropRect
+            completionHandler?()
+        }
+    }
+    
     // MARK: - Configuration
     
     fileprivate func configureCropView() {
-        view.addSubview(cutterView)
+        view.addSubview(circleOverlyView)
     }
     
     fileprivate func configureStickersCollectionView() {
@@ -280,7 +307,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             draggedView = view.hitTest(location, with: nil) as? UIImageView
         case .changed:
             if let draggedView = draggedView {
-                guard draggedView.center.y + translation.y < self.cutterView.frame.maxY && draggedView.center.y + translation.y > self.cutterView.frame.minY  else {
+                guard  (draggedView.center.y + translation.y < self.circleOverlyView.frame.maxY && draggedView.center.y + translation.y > self.circleOverlyView.frame.minY) && (draggedView.center.x + translation.x > self.circleOverlyView.frame.minX && draggedView.center.x + translation.x < self.circleOverlyView.frame.maxX) else {
                     return
                 }
                 draggedView.center = CGPoint(x: draggedView.center.x + translation.x, y: draggedView.center.y + translation.y)
@@ -364,14 +391,15 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             let imageView = UIImageView(image: stickerFilter.sticker)
             imageView.isUserInteractionEnabled = true
             
-            let size = stickerFilter.absolutStickerSizeForImageSize(cutterView.bounds.size)
+            let size = stickerFilter.absolutStickerSizeForImageSize(stickersClipView.bounds.size)
             imageView.frame.size = size
             
-            let center = CGPoint(x: stickerFilter.center.x * self.cutterView.frame.size.width,
-                                 y: stickerFilter.center.y * cutterView.frame.size.height)
+            let center = CGPoint(x: stickerFilter.center.x * self.circleOverlyView.frame.size.width,
+                                 y: stickerFilter.center.y * circleOverlyView.frame.size.height)
             imageView.center = center
             imageView.transform = stickerFilter.transform
             view.addSubview(imageView)
+            self.view.bringSubviewToFront(self.circleOverlyView)
         }
     }
     
@@ -387,10 +415,9 @@ extension IMGLYStickersEditorViewController: UICollectionViewDelegate {
         let imageView = UIImageView(image: sticker.image)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(sticker.image)
-        imageView.center = CGPoint(x: self.cutterView.circleBounds.midX, y: self.cutterView.circleBounds.midY)
-        
+        imageView.center = CGPoint(x: self.circleOverlyView.frame.midX, y: self.circleOverlyView.frame.midY)
         view.addSubview(imageView)
-        self.view.bringSubviewToFront(self.cutterView)
+        self.view.bringSubviewToFront(self.circleOverlyView)
         imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
         
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: [], animations: { () -> Void in
@@ -402,6 +429,7 @@ extension IMGLYStickersEditorViewController: UICollectionViewDelegate {
 extension IMGLYStickersEditorViewController: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if (gestureRecognizer is UIPinchGestureRecognizer && otherGestureRecognizer is UIRotationGestureRecognizer) || (gestureRecognizer is UIRotationGestureRecognizer && otherGestureRecognizer is UIPinchGestureRecognizer) {
+                        
             return true
         }
         
