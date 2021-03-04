@@ -248,6 +248,13 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                 } else {
                     dismiss(animated: true, completion: nil)
                 }
+            } else {
+                if let completionBlock = completionBlock {
+                    highResolutionImage = highResolutionImage?.imgly_normalizedImage
+                    completionBlock(.done, highResolutionImage)
+                } else {
+                    dismiss(animated: true, completion: nil)
+                }
             }
         }
         else {
