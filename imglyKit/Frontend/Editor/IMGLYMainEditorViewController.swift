@@ -249,12 +249,6 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                     dismiss(animated: true, completion: nil)
                 }
             }
-            else {
-                let alertController = UIAlertController(title: "Warning", message: "Please add sticker", preferredStyle: .alert)
-                let okAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
-                alertController.addAction(okAction)
-                self.present(alertController, animated: true, completion: nil)
-            }
         }
         else {
             if let completionBlock = completionBlock {
