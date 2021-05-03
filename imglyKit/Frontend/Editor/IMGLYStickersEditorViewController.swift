@@ -46,8 +46,8 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
                 if let image = view.image {
                     let stickerFilter = IMGLYInstanceFactory.stickerFilter()
                     stickerFilter.sticker = image
-                    let center = CGPoint(x: view.center.x / self.circleOverlyView.frame.size.width,
-                                         y: view.center.y / self.circleOverlyView.frame.size.height)
+                    let center = CGPoint(x: (view.center.x - stickersClipView.frame.origin.x) / stickersClipView.frame.size.width,
+                                         y: (view.center.y - stickersClipView.frame.origin.y) / stickersClipView.frame.size.height)
                     
                     var size = initialSizeForStickerImage(image)
                     size.width = size.width / self.circleOverlyView.bounds.size.width
