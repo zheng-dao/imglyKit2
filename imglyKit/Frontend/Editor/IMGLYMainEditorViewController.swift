@@ -238,12 +238,12 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                             filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
                             
                             DispatchQueue.main.async {
-                                completionBlock(.done, filteredHighResolutionImage)
+                                completionBlock(.done, self.previewImageView.image)
                                 sender?.isEnabled = true
                             }
                         }
                     } else {
-                        completionBlock(.done, filteredHighResolutionImage)
+                        completionBlock(.done, self.previewImageView.image)
                     }
                 } else {
                     dismiss(animated: true, completion: nil)
@@ -251,7 +251,7 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
             } else {
                 if let completionBlock = completionBlock {
                     highResolutionImage = highResolutionImage?.imgly_normalizedImage
-                    completionBlock(.done, highResolutionImage)
+                    completionBlock(.done, self.previewImageView.image)
                 } else {
                     dismiss(animated: true, completion: nil)
                 }
@@ -268,12 +268,12 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                         filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
                         
                         DispatchQueue.main.async {
-                            completionBlock(.done, filteredHighResolutionImage)
+                            completionBlock(.done, self.previewImageView.image)
                             sender?.isEnabled = true
                         }
                     }
                 } else {
-                    completionBlock(.done, filteredHighResolutionImage)
+                    completionBlock(.done, self.previewImageView.image)
                 }
             } else {
                 dismiss(animated: true, completion: nil)

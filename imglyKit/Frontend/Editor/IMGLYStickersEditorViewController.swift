@@ -197,13 +197,16 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let cropRect = fixedFilterStack.orientationCropFilter.cropRect
         if cropRect.origin.x != 0 || cropRect.origin.y != 0 ||
             cropRect.size.width != 1.0 || cropRect.size.height != 1.0 {
-                updatePreviewImageWithoutCropWithCompletion {
-                    self.view.setNeedsLayout()
-                    self.view.layoutIfNeeded()
-                    self.reCalculateCropRectBounds()
-                }
+            updatePreviewImageWithCompletion {
+                self.lowResolutionImage = self.previewImageView.image
+                self.view.setNeedsLayout()
+                self.view.layoutIfNeeded()
+                self.reCalculateCropRectBounds()
+            }
         } else {
-            reCalculateCropRectBounds()
+            updatePreviewImageWithoutCropWithCompletion {
+                self.reCalculateCropRectBounds()
+            }
         }
     }
     
