@@ -479,13 +479,13 @@ open class IMGLYCameraViewController: UIViewController {
                 if let filterIntensitySlider = self?.filterIntensitySlider, filterIntensitySlider.alpha > 0 {
                     UIView.animate(withDuration: 0.25, animations: {
                         filterIntensitySlider.alpha = 0
-                    }) 
+                    })
                 }
             } else {
                 if let filterIntensitySlider = self?.filterIntensitySlider, filterIntensitySlider.alpha < 1 {
                     UIView.animate(withDuration: 0.25, animations: {
                         filterIntensitySlider.alpha = 1
-                    }) 
+                    })
                 }
                 
                 self?.resetHideSliderTimer()
@@ -689,7 +689,7 @@ open class IMGLYCameraViewController: UIViewController {
         UIView.animate(withDuration: 0.25, animations: {
             self.filterIntensitySlider.alpha = 0
             self.hideSliderTimer = nil
-        }) 
+        })
     }
     
     @objc open func changeFlash(_ sender: UIButton?) {
@@ -784,11 +784,11 @@ open class IMGLYCameraViewController: UIViewController {
     
     // MARK: - Completion
     
-    fileprivate func editorCompletionBlock(_ result: IMGLYEditorResult, image: UIImage?) {
-        if let image = image, result == .done {
+    fileprivate func editorCompletionBlock(_ result: IMGLYEditorResult, image: UIImage?, img: UIImage?) {
+        if let image = image, let img = img, result == .done {
             //UIImageWriteToSavedPhotosAlbum(image, self, #selector(IMGLYCameraViewController.image(_:didFinishSavingWithError:contextInfo:)), nil)
             if let completionhandler = self.editingcompletionBlock {
-                completionhandler(result, image)
+                completionhandler(result, image, img)
             }
         }
         
@@ -991,7 +991,7 @@ extension IMGLYCameraViewController: IMGLYCameraControllerDelegate {
                 for recordingModeSelectionButton in self.recordingModeSelectionButtons {
                     recordingModeSelectionButton.alpha = 0
                 }
-            }) 
+            })
         }
     }
     
@@ -1013,7 +1013,7 @@ extension IMGLYCameraViewController: IMGLYCameraControllerDelegate {
             if let actionButton = self.actionButtonContainer.subviews.first as? IMGLYVideoRecordButton {
                 actionButton.recording = false
             }
-        }) 
+        })
     }
     
     public func cameraControllerDidFailRecording(_ cameraController: IMGLYCameraController, error: NSError?) {
@@ -1078,10 +1078,10 @@ let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
 
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
-	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+    return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
 }
 
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
-	return input.rawValue
+    return input.rawValue
 }
