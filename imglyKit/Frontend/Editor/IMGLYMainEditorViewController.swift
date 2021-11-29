@@ -28,7 +28,7 @@ import UIKit
     case reset
 }
 
-public typealias IMGLYEditorCompletionBlock = (IMGLYEditorResult, UIImage?) -> Void
+public typealias IMGLYEditorCompletionBlock = (IMGLYEditorResult, UIImage?, UIImage?) -> Void
 
 private let ButtonCollectionViewCellReuseIdentifier = "ButtonCollectionViewCell"
 private let ButtonCollectionViewCellSize = CGSize(width: 66, height: 90)
@@ -43,13 +43,13 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
         let bundle = Bundle(for: type(of: self))
         var handlers = [IMGLYActionButton]()
         
-        handlers.append(
-            IMGLYActionButton(
-                title: NSLocalizedString("main-editor.button.magic", tableName: nil, bundle: bundle, value: "", comment: ""),
-                image: UIImage(named: "icon_option_magic", in: bundle, compatibleWith: nil),
-                selectedImage: UIImage(named: "icon_option_magic_active", in: bundle, compatibleWith: nil),
-                handler: { [unowned self] in self.subEditorButtonPressed(.magic) },
-                showSelection: { [unowned self] in return self.fixedFilterStack.enhancementFilter._enabled }))
+//        handlers.append(
+//            IMGLYActionButton(
+//                title: NSLocalizedString("main-editor.button.magic", tableName: nil, bundle: bundle, value: "", comment: ""),
+//                image: UIImage(named: "icon_option_magic", in: bundle, compatibleWith: nil),
+//                selectedImage: UIImage(named: "icon_option_magic_active", in: bundle, compatibleWith: nil),
+//                handler: { [unowned self] in self.subEditorButtonPressed(.magic) },
+//                showSelection: { [unowned self] in return self.fixedFilterStack.enhancementFilter._enabled }))
         
         handlers.append(
             IMGLYActionButton(
@@ -63,23 +63,23 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                 image: UIImage(named: "icon_option_sticker", in: bundle, compatibleWith: nil),
                 handler: { [unowned self] in self.subEditorButtonPressed(.stickers) }))
         
-        handlers.append(
-            IMGLYActionButton(
-                title: NSLocalizedString("main-editor.button.orientation", tableName: nil, bundle: bundle, value: "", comment: ""),
-                image: UIImage(named: "icon_option_orientation", in: bundle, compatibleWith: nil),
-                handler: { [unowned self] in self.subEditorButtonPressed(.orientation) }))
+//        handlers.append(
+//            IMGLYActionButton(
+//                title: NSLocalizedString("main-editor.button.orientation", tableName: nil, bundle: bundle, value: "", comment: ""),
+//                image: UIImage(named: "icon_option_orientation", in: bundle, compatibleWith: nil),
+//                handler: { [unowned self] in self.subEditorButtonPressed(.orientation) }))
         
-        handlers.append(
-            IMGLYActionButton(
-                title: NSLocalizedString("main-editor.button.focus", tableName: nil, bundle: bundle, value: "", comment: ""),
-                image: UIImage(named: "icon_option_focus", in: bundle, compatibleWith: nil),
-                handler: { [unowned self] in self.subEditorButtonPressed(.focus) }))
+//        handlers.append(
+//            IMGLYActionButton(
+//                title: NSLocalizedString("main-editor.button.focus", tableName: nil, bundle: bundle, value: "", comment: ""),
+//                image: UIImage(named: "icon_option_focus", in: bundle, compatibleWith: nil),
+//                handler: { [unowned self] in self.subEditorButtonPressed(.focus) }))
         
-        handlers.append(
-            IMGLYActionButton(
-                title: NSLocalizedString("main-editor.button.crop", tableName: nil, bundle: bundle, value: "", comment: ""),
-                image: UIImage(named: "icon_option_crop", in: bundle, compatibleWith: nil),
-                handler: { [unowned self] in self.subEditorButtonPressed(.crop) }))
+//        handlers.append(
+//            IMGLYActionButton(
+//                title: NSLocalizedString("main-editor.button.crop", tableName: nil, bundle: bundle, value: "", comment: ""),
+//                image: UIImage(named: "icon_option_crop", in: bundle, compatibleWith: nil),
+//                handler: { [unowned self] in self.subEditorButtonPressed(.crop) }))
         
         handlers.append(
             IMGLYActionButton(
@@ -183,8 +183,9 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
         }
     }
     
-    fileprivate func subEditorDidComplete(_ image: UIImage?, fixedFilterStack: IMGLYFixedFilterStack) {
+    fileprivate func subEditorDidComplete(_ image: UIImage?, img: UIImage?, fixedFilterStack: IMGLYFixedFilterStack) {
         previewImageView.image = image
+        croppedImage = img
         self.fixedFilterStack = fixedFilterStack
     }
     
@@ -217,6 +218,12 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                 DispatchQueue.main.async {
                     self.previewImageView.image = processedImage
                     self.updating = false
+                    let bundle = Bundle(for: type(of: self))
+                    let actionButton = IMGLYActionButton(
+                        title: NSLocalizedString("main-editor.button.crop", tableName: nil, bundle: bundle, value: "", comment: ""),
+                        image: UIImage(named: "icon_option_crop", in: bundle, compatibleWith: nil),
+                        handler: { [unowned self] in self.subEditorButtonPressed(.crop) })
+                    actionButton.handler()
                 }
             }
         }
@@ -232,18 +239,18 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                     highResolutionImage = highResolutionImage?.imgly_normalizedImage
                     var filteredHighResolutionImage: UIImage?
                     
-                    if let highResolutionImage = self.highResolutionImage {
+                    if let lowResolutionImage = self.lowResolutionImage {
                         sender?.isEnabled = false
                         PhotoProcessorQueue.async {
-                            filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
+                            filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(lowResolutionImage, filters: self.fixedFilterStack.activeFiltersWithoutSticker)
                             
                             DispatchQueue.main.async {
-                                completionBlock(.done, self.previewImageView.image)
+                                completionBlock(.done, self.previewImageView.image, self.croppedImage)
                                 sender?.isEnabled = true
                             }
                         }
                     } else {
-                        completionBlock(.done, self.previewImageView.image)
+                        completionBlock(.done, self.previewImageView.image, self.croppedImage)
                     }
                 } else {
                     dismiss(animated: true, completion: nil)
@@ -251,7 +258,7 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
             } else {
                 if let completionBlock = completionBlock {
                     highResolutionImage = highResolutionImage?.imgly_normalizedImage
-                    completionBlock(.done, self.previewImageView.image)
+                    completionBlock(.done, self.previewImageView.image, self.croppedImage)
                 } else {
                     dismiss(animated: true, completion: nil)
                 }
@@ -262,18 +269,18 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                 highResolutionImage = highResolutionImage?.imgly_normalizedImage
                 var filteredHighResolutionImage: UIImage?
                 
-                if let highResolutionImage = self.highResolutionImage {
+                if let lowResolutionImage = self.lowResolutionImage {
                     sender?.isEnabled = false
                     PhotoProcessorQueue.async {
-                        filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
+                        filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(lowResolutionImage, filters: self.fixedFilterStack.activeFiltersWithoutSticker)
                         
                         DispatchQueue.main.async {
-                            completionBlock(.done, self.previewImageView.image)
+                            completionBlock(.done, self.previewImageView.image, self.croppedImage)
                             sender?.isEnabled = true
                         }
                     }
                 } else {
-                    completionBlock(.done, self.previewImageView.image)
+                    completionBlock(.done, self.previewImageView.image, nil)
                 }
             } else {
                 dismiss(animated: true, completion: nil)
@@ -283,7 +290,7 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
     
     @objc fileprivate func cancelTapped(_ sender: UIBarButtonItem?) {
         if let completionBlock = completionBlock {
-            completionBlock(.cancel, nil)
+            completionBlock(.cancel, nil, nil)
         } else {
             dismiss(animated: true, completion: nil)
         }
@@ -300,7 +307,7 @@ extension IMGLYMainEditorViewController: UICollectionViewDataSource {
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ButtonCollectionViewCellReuseIdentifier, for: indexPath) 
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ButtonCollectionViewCellReuseIdentifier, for: indexPath)
         
         if let buttonCell = cell as? IMGLYButtonCollectionViewCell {
             let actionButton = actionButtons[indexPath.item]

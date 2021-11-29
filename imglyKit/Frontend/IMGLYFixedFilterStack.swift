@@ -25,7 +25,7 @@ open class IMGLYFixedFilterStack: NSObject {
         filter.storeEnhancedImage = true
         return filter
         }()
-    
+    open var stickerCropFilter = IMGLYInstanceFactory.orientationCropFilter()
     open var orientationCropFilter = IMGLYInstanceFactory.orientationCropFilter()
     open var effectFilter = IMGLYInstanceFactory.effectFilterWithType(IMGLYFilterType.none)
     open var brightnessFilter = IMGLYInstanceFactory.colorAdjustmentFilter()
@@ -34,10 +34,16 @@ open class IMGLYFixedFilterStack: NSObject {
     open var stickerFilters = [CIFilter]()
     
     open var activeFilters: [CIFilter] {
-        var activeFilters: [CIFilter] = [enhancementFilter, orientationCropFilter, tiltShiftFilter, effectFilter, brightnessFilter, textFilter]
+        var activeFilters: [CIFilter] = [enhancementFilter, stickerCropFilter, orientationCropFilter, tiltShiftFilter, effectFilter, brightnessFilter, textFilter]
         activeFilters += stickerFilters
         
         return activeFilters
+    }
+    
+    // MARK: - New Added
+    open var activeFiltersWithoutSticker: [CIFilter] {
+        let activeFiltersWithoutSticker: [CIFilter] = [enhancementFilter, stickerCropFilter, orientationCropFilter, tiltShiftFilter, effectFilter, brightnessFilter, textFilter]
+        return activeFiltersWithoutSticker
     }
     
     // MARK: - Initializers

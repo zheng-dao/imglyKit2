@@ -32,6 +32,8 @@ open class IMGLYEditorViewController: UIViewController {
     
     open var lowResolutionImage: UIImage?
     
+    open var croppedImage: UIImage?
+    
     open fileprivate(set) lazy var previewImageView: IMGLYZoomingImageView = {
         let imageView = IMGLYZoomingImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false

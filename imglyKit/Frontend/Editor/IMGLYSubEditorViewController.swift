@@ -8,7 +8,7 @@
 
 import UIKit
 
-public typealias IMGLYSubEditorCompletionBlock = (UIImage?, IMGLYFixedFilterStack) -> (Void)
+public typealias IMGLYSubEditorCompletionBlock = (UIImage?, UIImage?, IMGLYFixedFilterStack) -> (Void)
 public typealias IMGLYPreviewImageGenerationCompletionBlock = () -> (Void)
 
 open class IMGLYSubEditorViewController: IMGLYEditorViewController {
@@ -33,7 +33,7 @@ open class IMGLYSubEditorViewController: IMGLYEditorViewController {
     // MARK: - EditorViewController
     
     open override func tappedDone(_ sender: UIBarButtonItem?) {
-        completionHandler?(previewImageView.image, fixedFilterStack)
+        completionHandler?(previewImageView.image, self.croppedImage, fixedFilterStack)
         navigationController?.popViewController(animated: true)
     }
     
@@ -44,9 +44,10 @@ open class IMGLYSubEditorViewController: IMGLYEditorViewController {
             updating = true
             PhotoProcessorQueue.async {
                 let processedImage = IMGLYPhotoProcessor.processWithUIImage(lowResolutionImage, filters: self.fixedFilterStack.activeFilters)
-                
+                let croppedImage = IMGLYPhotoProcessor.processWithUIImage(lowResolutionImage, filters: self.fixedFilterStack.activeFiltersWithoutSticker)
                 DispatchQueue.main.async {
                     self.previewImageView.image = processedImage
+                    self.croppedImage = croppedImage
                     self.updating = false
                     completionHandler?()
                 }

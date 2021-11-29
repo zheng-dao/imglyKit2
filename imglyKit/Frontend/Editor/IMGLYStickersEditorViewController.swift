@@ -62,7 +62,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         }
         
         if addedStickers {
-            self.fixedFilterStack.orientationCropFilter.cropRect = normalizedCropRect()
+            self.fixedFilterStack.stickerCropFilter.cropRect = normalizedCropRect()
             updatePreviewImageWithCompletion {
                 self.stickersClipView.removeFromSuperview()
                 super.tappedDone(sender)
@@ -194,7 +194,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         
         rerenderPreviewWithoutStickers()
         
-        let cropRect = fixedFilterStack.orientationCropFilter.cropRect
+        let cropRect = fixedFilterStack.stickerCropFilter.cropRect
         if cropRect.origin.x != 0 || cropRect.origin.y != 0 ||
             cropRect.size.width != 1.0 || cropRect.size.height != 1.0 {
             updatePreviewImageWithCompletion {
@@ -204,6 +204,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
                 self.reCalculateCropRectBounds()
             }
         } else {
+//            self.lowResolutionImage = self.croppedImage
             updatePreviewImageWithoutCropWithCompletion {
                 self.reCalculateCropRectBounds()
             }
@@ -241,14 +242,15 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         stickersClipView.frame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
         circleOverlyView.frame = self.previewImageView.frame
         circleOverlyView.circleFrame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
-        reCalculateCropRectBounds()
+        
+    ()
     }
         
     fileprivate func updatePreviewImageWithoutCropWithCompletion(_ completionHandler: IMGLYPreviewImageGenerationCompletionBlock?) {
-        let oldCropRect = fixedFilterStack.orientationCropFilter.cropRect
-        fixedFilterStack.orientationCropFilter.cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        let oldCropRect = fixedFilterStack.stickerCropFilter.cropRect
+        fixedFilterStack.stickerCropFilter.cropRect = CGRect(x: 0, y: 0, width: 1, height: 1)
         updatePreviewImageWithCompletion { () -> (Void) in
-            self.fixedFilterStack.orientationCropFilter.cropRect = oldCropRect
+            self.fixedFilterStack.stickerCropFilter.cropRect = oldCropRect
             completionHandler?()
         }
     }
@@ -398,7 +400,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             imageView.frame.size = size
             
             let center = CGPoint(x: stickerFilter.center.x * self.circleOverlyView.frame.size.width,
-                                 y: stickerFilter.center.y * circleOverlyView.frame.size.height)
+                                 y: stickerFilter.center.y * self.circleOverlyView.frame.size.height)
             imageView.center = center
             imageView.transform = stickerFilter.transform
             view.addSubview(imageView)

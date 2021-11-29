@@ -78,7 +78,7 @@ open class IMGLYCropEditorViewController: IMGLYSubEditorViewController {
         }()
     
     fileprivate let cropRectComponent = IMGLYInstanceFactory.cropRectComponent()
-    open var selectionMode = IMGLYSelectionMode.free
+    open var selectionMode = IMGLYSelectionMode.oneToOne
     open var selectionRatio = CGFloat(1.0)
     fileprivate var cropRectLeftBound = CGFloat(0)
     fileprivate var cropRectRightBound = CGFloat(0)
@@ -141,17 +141,17 @@ open class IMGLYCropEditorViewController: IMGLYSubEditorViewController {
         buttonContainerView.translatesAutoresizingMaskIntoConstraints = false
         bottomContainerView.addSubview(buttonContainerView)
         
-        buttonContainerView.addSubview(freeRatioButton)
+//        buttonContainerView.addSubview(freeRatioButton)
         buttonContainerView.addSubview(oneToOneRatioButton)
-        buttonContainerView.addSubview(fourToThreeRatioButton)
-        buttonContainerView.addSubview(sixteenToNineRatioButton)
+//        buttonContainerView.addSubview(fourToThreeRatioButton)
+//        buttonContainerView.addSubview(sixteenToNineRatioButton)
         
         let views = [
             "buttonContainerView" : buttonContainerView,
-            "freeRatioButton" : freeRatioButton,
+//            "freeRatioButton" : freeRatioButton,
             "oneToOneRatioButton" : oneToOneRatioButton,
-            "fourToThreeRatioButton" : fourToThreeRatioButton,
-            "sixteenToNineRatioButton" : sixteenToNineRatioButton
+//            "fourToThreeRatioButton" : fourToThreeRatioButton,
+//            "sixteenToNineRatioButton" : sixteenToNineRatioButton
         ]
         
         let metrics = [
@@ -160,11 +160,14 @@ open class IMGLYCropEditorViewController: IMGLYSubEditorViewController {
         
         // Button Constraints
         
-        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "|[freeRatioButton(==buttonWidth)][oneToOneRatioButton(==freeRatioButton)][fourToThreeRatioButton(==freeRatioButton)][sixteenToNineRatioButton(==freeRatioButton)]|", options: [], metrics: metrics, views: views))
-        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[freeRatioButton]|", options: [], metrics: nil, views: views))
+//        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "|[freeRatioButton(==buttonWidth)][oneToOneRatioButton(==freeRatioButton)][fourToThreeRatioButton(==freeRatioButton)][sixteenToNineRatioButton(==freeRatioButton)]|", options: [], metrics: metrics, views: views))
+//        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[freeRatioButton]|", options: [], metrics: nil, views: views))
+//        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[oneToOneRatioButton]|", options: [], metrics: nil, views: views))
+//        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[fourToThreeRatioButton]|", options: [], metrics: nil, views: views))
+//        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[sixteenToNineRatioButton]|", options: [], metrics: nil, views: views))
+        
+        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "|[oneToOneRatioButton(==buttonWidth)]|", options: [], metrics: metrics, views: views))
         buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[oneToOneRatioButton]|", options: [], metrics: nil, views: views))
-        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[fourToThreeRatioButton]|", options: [], metrics: nil, views: views))
-        buttonContainerView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[sixteenToNineRatioButton]|", options: [], metrics: nil, views: views))
         
         // Container Constraints
         
